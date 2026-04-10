@@ -1,0 +1,31 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: diplom-sed-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: diplom_sed
+      POSTGRES_USER: diplom
+      POSTGRES_PASSWORD: diplom_password_change_me
+    ports:
+      - "5432:5432"
+    volumes:
+      - diplom_sed_pgdata:/var/lib/postgresql/data
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: diplom-sed-web
+    restart: unless-stopped
+    depends_on:
+      - db
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://diplom:diplom_password_change_me@db:5432/diplom_sed?schema=public
+    ports:
+      - "3000:3000"
+
+volumes:
+  diplom_sed_pgdata:
+

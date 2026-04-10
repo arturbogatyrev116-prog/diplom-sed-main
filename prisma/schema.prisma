@@ -1,0 +1,193 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  EMPLOYEE
+  MANAGER
+  OWNER
+  ADMIN
+}
+
+enum DocumentStatus {
+  DRAFT
+  ON_APPROVAL
+  REVISION_REQUIRED
+  APPROVED
+  REJECTED
+  SIGNED
+  ARCHIVED
+}
+
+enum DocumentType {
+  CONTRACT
+  ORDER
+  STATEMENT
+  INVOICE
+  MEMO
+}
+
+enum ApprovalStepStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  RETURNED_FOR_REVISION
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  fullName      String
+  passwordHash  String
+  role          UserRole
+  isActive      Boolean   @default(true)
+  mfaEnabled    Boolean   @default(false)
+  mfaSecret     String?
+  mfaVerifiedAt DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  authoredDocuments  Document[]        @relation("DocumentAuthor")
+  comments           Comment[]         @relation("CommentAuthor")
+  documentVersions   DocumentVersion[] @relation("VersionCreatedBy")
+  approvalSteps      ApprovalStep[]    @relation("ApprovalStepApprover")
+  attachments        Attachment[]      @relation("AttachmentUploader")
+  auditLogs          AuditLog[]        @relation("AuditLogActor")
+  signedDocuments    Signature[]       @relation("DocumentSigner")
+}
+
+model Document {
+  id             String         @id @default(cuid())
+  title          String
+  type           DocumentType
+  status         DocumentStatus @default(DRAFT)
+  content        String
+  contentHash    String?
+  authorId       String
+  currentVersion Int            @default(1)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  archivedAt     DateTime?
+  deletedAt      DateTime?
+
+  author        User              @relation("DocumentAuthor", fields: [authorId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  versions      DocumentVersion[]
+  comments      Comment[]
+  approvalRoute ApprovalRoute?
+  attachments   Attachment[]
+  signature     Signature?
+
+  @@index([status])
+  @@index([type])
+  @@index([authorId])
+  @@index([createdAt])
+  @@index([deletedAt])
+}
+
+model DocumentVersion {
+  id              String   @id @default(cuid())
+  documentId      String
+  versionNumber   Int
+  titleSnapshot   String
+  contentSnapshot String
+  createdById     String
+  createdAt       DateTime @default(now())
+
+  document  Document @relation(fields: [documentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  createdBy User     @relation("VersionCreatedBy", fields: [createdById], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@unique([documentId, versionNumber])
+}
+
+model Comment {
+  id         String   @id @default(cuid())
+  documentId String
+  authorId   String
+  content    String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  author   User     @relation("CommentAuthor", fields: [authorId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@index([documentId])
+}
+
+model ApprovalRoute {
+  id         String   @id @default(cuid())
+  documentId String   @unique
+  createdAt  DateTime @default(now())
+
+  document Document       @relation(fields: [documentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  steps    ApprovalStep[]
+}
+
+model ApprovalStep {
+  id         String             @id @default(cuid())
+  routeId    String
+  approverId String
+  stepOrder  Int
+  status     ApprovalStepStatus @default(PENDING)
+  comment    String?
+  decidedAt  DateTime?
+  createdAt  DateTime           @default(now())
+
+  route    ApprovalRoute @relation(fields: [routeId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  approver User          @relation("ApprovalStepApprover", fields: [approverId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@unique([routeId, stepOrder])
+  @@index([approverId])
+}
+
+model Attachment {
+  id           String   @id @default(cuid())
+  documentId   String
+  filename     String
+  storagePath  String
+  mimeType     String
+  sizeBytes    Int
+  uploadedById String
+  createdAt    DateTime @default(now())
+
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  uploadedBy User     @relation("AttachmentUploader", fields: [uploadedById], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@index([documentId])
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  actorId     String?
+  action      String
+  entityType  String
+  entityId    String?
+  detailsJson Json
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+
+  actor User? @relation("AuditLogActor", fields: [actorId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@index([actorId])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}
+
+model Signature {
+  id            String   @id @default(cuid())
+  documentId    String   @unique
+  signedById    String
+  contentHash   String
+  signaturePath String
+  signedAt      DateTime @default(now())
+
+  document  Document @relation(fields: [documentId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  signedBy  User     @relation("DocumentSigner", fields: [signedById], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@index([signedById])
+  @@index([signedAt])
+}
