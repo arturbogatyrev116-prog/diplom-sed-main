@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import type { NextConfig } from "next";
 
 function buildCspValue(env: "development" | "production" | "test") {

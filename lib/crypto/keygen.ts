@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import forge from "node-forge";
 import fs from "fs";
 import path from "path";
@@ -157,8 +158,8 @@ export function getCertificateInfo(userId: string): {
 
     const cn = decodeSubjectField(cert.subject.getField("CN")) ?? "";
     // emailAddress имеет shortName 'E', ищем по OID (type)
-    const emailAttr = cert.subject.attributes.find(
-      (a) => a.type === forge.pki.oids.emailAddress
+    const emailAttr = (cert.subject.attributes as any[]).find(
+      (a: any) => a.type === forge.pki.oids.emailAddress
     );
     const email = emailAttr?.value ?? "";
 

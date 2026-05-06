@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import { prisma } from "../lib/db/prisma";
 import { ApprovalStepStatus } from "@prisma/client";
 

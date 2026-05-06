@@ -11,10 +11,6 @@ export type AuditLogEventInput = {
   userAgent?: string | null;
 };
 
-/**
- * Best-effort запись в AuditLog.
- * Ошибки намеренно глотаются, чтобы не ломать основной business-flow.
- */
 export async function logAuditEvent(input: AuditLogEventInput): Promise<void> {
   try {
     await prisma.auditLog.create({
@@ -28,8 +24,8 @@ export async function logAuditEvent(input: AuditLogEventInput): Promise<void> {
         userAgent: input.userAgent ?? null,
       },
     });
-  } catch {
-    // intentionally empty
+  } catch (error) {
+    console.error("Failed to create audit log:", error instanceof Error ? error.message : String(error));
   }
 }
 

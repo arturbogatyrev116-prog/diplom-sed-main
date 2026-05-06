@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import forge from "node-forge";
 import fs from "fs";
 import path from "path";
@@ -184,8 +185,8 @@ export function verifyCMSSignature(params: {
     }
 
     const signerCN = decodeSubjectField(cert.subject.getField("CN"));
-    const emailAttr = cert.subject.attributes.find(
-      (a) => a.type === forge.pki.oids.emailAddress
+    const emailAttr = (cert.subject.attributes as any[]).find(
+      (a: any) => a.type === forge.pki.oids.emailAddress
     );
     const signerEmail = emailAttr?.value;
 

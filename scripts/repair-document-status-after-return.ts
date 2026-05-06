@@ -4,6 +4,7 @@
  *
  * Запуск: npx dotenv-cli -e .env -- npx tsx scripts/repair-document-status-after-return.ts
  */
+/// <reference types="node" />
 import { prisma } from "../lib/db/prisma";
 import { ApprovalStepStatus, DocumentStatus } from "@prisma/client";
 

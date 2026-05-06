@@ -1,5 +1,7 @@
 "use server";
 
+/// <reference types="node" />
+import path from "path";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { DocumentStatus } from "@prisma/client";
@@ -311,7 +313,9 @@ export async function signDocument(documentId: string): Promise<SignDocumentStat
       });
 
       // Относительный путь для хранения в БД
-      const relativeSignaturePath = signaturePath.split("data")[1] ?? signaturePath;
+      const relativeSignaturePath = signaturePath.includes(path.sep)
+        ? signaturePath.replace(/\\/g, "/").split("data/")[1] ?? signaturePath
+        : signaturePath;
 
       // 4. Запись в БД
       await tx.signature.create({

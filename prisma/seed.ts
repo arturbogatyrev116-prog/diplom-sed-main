@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import "dotenv/config";
 import { PrismaClient, UserRole, DocumentStatus, DocumentType, ApprovalStepStatus } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
