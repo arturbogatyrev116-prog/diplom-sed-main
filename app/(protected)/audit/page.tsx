@@ -53,7 +53,7 @@ export default async function AuditPage() {
                   </td>
                   <td className="px-4 py-3">
                     <pre className="max-h-28 overflow-auto rounded-md bg-muted/20 p-2 text-xs whitespace-pre-wrap">
-                      {JSON.stringify(e.detailsJson ?? {}, null, 0)}
+                      {e.detailsJson ?? "{}"}
                     </pre>
                   </td>
                 </tr>

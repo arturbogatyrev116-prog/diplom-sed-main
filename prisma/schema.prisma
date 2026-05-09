@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
 }
 
 enum UserRole {
@@ -165,7 +165,7 @@ model AuditLog {
   action      String
   entityType  String
   entityId    String?
-  detailsJson Json
+  detailsJson String
   ipAddress   String?
   userAgent   String?
   createdAt   DateTime @default(now())

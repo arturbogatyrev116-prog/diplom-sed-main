@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -E \"\\\\.\\(ts|tsx|json|yml|yaml|md\\)$\")",
+      "Bash(rm -rf prisma/migrations)",
+      "Bash(npm install *)",
+      "Bash(npx prisma *)",
+      "Bash(npm run *)",
+      "Bash(node -e \"require\\('dotenv'\\).config\\(\\); console.log\\('DATABASE_URL:', process.env.DATABASE_URL\\)\")",
+      "Bash(node *)",
+      "Bash(npm test *)",
+      "Bash(npx tsx *)"
+    ]
+  }
+}

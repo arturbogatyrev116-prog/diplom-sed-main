@@ -1,13 +1,14 @@
 /// <reference types="node" />
 import "dotenv/config";
 import { PrismaClient, UserRole, DocumentStatus, DocumentType, ApprovalStepStatus } from "@prisma/client";
-import { PrismaPg } from "@prisma/adapter-pg";
+import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
 import bcrypt from "bcryptjs";
 import { generateKeyPairAndCertificate } from "@/lib/crypto/keygen";
 import { createCMSSignature } from "@/lib/crypto/sign";
 import { sha256 } from "@/lib/crypto/hash";
 
-const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
+const url = process.env.DATABASE_URL ?? "file:./prisma/dev.db";
+const adapter = new PrismaBetterSqlite3({ url });
 const prisma = new PrismaClient({ adapter });
 
 const SEED_PASSWORD_PLAINTEXT = "Password123!";
@@ -217,11 +218,11 @@ async function seedMvpData() {
         action: "DOCUMENT_CREATED",
         entityType: "Document",
         entityId: document.id,
-        detailsJson: {
+        detailsJson: JSON.stringify({
           source: "seed",
           documentTitle: document.title,
           status: document.status,
-        },
+        }),
         ipAddress: "127.0.0.1",
         userAgent: "seed-script",
       },
@@ -244,10 +245,10 @@ async function seedMvpData() {
         action: "APPROVAL_ROUTE_CREATED",
         entityType: "ApprovalRoute",
         entityId: route.id,
-        detailsJson: {
+        detailsJson: JSON.stringify({
           source: "seed",
           stepCount: 2,
-        },
+        }),
       },
     });
   }
@@ -337,11 +338,11 @@ async function seedDigitalSignature(ownerId: string, documentId: string) {
       action: "DOCUMENT_SIGNED",
       entityType: "Document",
       entityId: documentId,
-      detailsJson: {
+      detailsJson: JSON.stringify({
         source: "seed",
         contentHash,
         status: DocumentStatus.SIGNED,
-      },
+      }),
       ipAddress: "127.0.0.1",
       userAgent: "seed-script",
     },

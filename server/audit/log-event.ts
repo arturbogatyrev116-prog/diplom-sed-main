@@ -1,12 +1,11 @@
 import { prisma } from "@/lib/db/prisma";
-import type { Prisma } from "@prisma/client";
 
 export type AuditLogEventInput = {
   actorId: string | null;
   action: string;
   entityType: string;
   entityId: string | null;
-  details?: Prisma.InputJsonValue;
+  details?: Record<string, unknown>;
   ipAddress?: string | null;
   userAgent?: string | null;
 };
@@ -19,7 +18,7 @@ export async function logAuditEvent(input: AuditLogEventInput): Promise<void> {
         action: input.action,
         entityType: input.entityType,
         entityId: input.entityId,
-        detailsJson: (input.details ?? ({} as Prisma.InputJsonValue)),
+        detailsJson: JSON.stringify(input.details ?? {}),
         ipAddress: input.ipAddress ?? null,
         userAgent: input.userAgent ?? null,
       },

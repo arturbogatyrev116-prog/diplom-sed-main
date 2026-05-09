@@ -122,7 +122,7 @@ export function canArchiveDocument(subject: DocumentSubject | null, doc: Documen
   if (!subject) return false;
   if (subject.role !== UserRole.OWNER) return false;
   if (!isActive(doc)) return false;
-  return doc.status === DocumentStatus.APPROVED || doc.status === DocumentStatus.REJECTED;
+  return doc.status === DocumentStatus.APPROVED || doc.status === DocumentStatus.REJECTED || doc.status === DocumentStatus.SIGNED;
 }
 
 /**

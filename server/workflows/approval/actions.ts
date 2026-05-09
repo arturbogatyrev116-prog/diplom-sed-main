@@ -366,7 +366,7 @@ export async function archiveDocument(
   const { documentId } = parsed.data;
   let deniedReason: string | null = null;
 
-  if (subject.role !== UserRole.ADMIN) {
+  if (subject.role !== UserRole.OWNER) {
     await logAuditEvent({
       actorId: subject.userId,
       action: DOCUMENT_ARCHIVE_DENIED,
