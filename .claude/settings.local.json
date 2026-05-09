@@ -10,7 +10,12 @@
       "Bash(node *)",
       "Bash(npm test *)",
       "Bash(npx tsx *)",
-      "Bash(npx tsc *)"
+      "Bash(npx tsc *)",
+      "Bash(du -sh node_modules)",
+      "Bash(du -sh .next)",
+      "Bash(du -sh data)",
+      "Bash(du -sh prisma)",
+      "Bash(du -sh .git)"
     ]
   }
 }

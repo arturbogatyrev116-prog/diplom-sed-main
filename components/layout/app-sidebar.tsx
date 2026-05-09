@@ -13,6 +13,7 @@ type AppSidebarProps = {
   showOutbox?: boolean;
   showPendingSign?: boolean;
   showUsers?: boolean;
+  showSearch?: boolean;
   role?: string;
 };
 
@@ -24,6 +25,7 @@ export function AppSidebar({
   showOutbox = true,
   showPendingSign = true,
   showUsers = false,
+  showSearch = true,
   role,
 }: AppSidebarProps) {
   const pathname = usePathname();
@@ -37,7 +39,7 @@ export function AppSidebar({
     ...(showPendingSign ? [{ href: "/pending-sign", label: pendingSignLabel, icon: PenLine }] : []),
     ...(showOutbox ? [{ href: "/outbox", label: "Исходящие", icon: Send }] : []),
     ...(showArchive ? [{ href: "/archive", label: "Архив", icon: Archive }] : []),
-    { href: "/search", label: "Поиск", icon: Search },
+    ...(showSearch ? [{ href: "/search", label: "Поиск", icon: Search }] : []),
     { href: "/settings/mfa", label: "Настройки MFA", icon: Shield },
     ...(showAudit ? [{ href: "/audit", label: "Аудит", icon: History }] : []),
     ...(showUsers ? [{ href: "/admin/users", label: "Пользователи", icon: Users }] : []),

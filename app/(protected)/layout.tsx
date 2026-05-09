@@ -26,6 +26,7 @@ export default async function ProtectedLayout({
   const showPendingSign = role === "MANAGER" || role === "OWNER";
 
   const showUsers = role === "ADMIN";
+  const showSearch = role === "EMPLOYEE" || role === "MANAGER" || role === "ADMIN";
 
   return (
     <div className="flex min-h-svh flex-col bg-background text-foreground">
@@ -43,6 +44,7 @@ export default async function ProtectedLayout({
           showOutbox={showOutbox}
           showPendingSign={showPendingSign}
           showUsers={showUsers}
+          showSearch={showSearch}
           role={role}
         />
         <main className="min-h-0 flex-1 overflow-auto p-4 md:p-6">{children}</main>
