@@ -64,6 +64,7 @@ export async function submitDocumentForApproval(
         throw new Error("DENIED");
       }
 
+      // Проверяем, что выбранный согласующий существует и является активным MANAGER
       const approver = await tx.user.findFirst({
         where: {
           id: approverId,
@@ -74,12 +75,7 @@ export async function submitDocumentForApproval(
       });
 
       if (!approver) {
-        deniedReason = "invalid_approver_role";
-        throw new Error("DENIED");
-      }
-
-      if (doc.authorId === approver.id) {
-        deniedReason = "self_approval";
+        deniedReason = "no_approver_available";
         throw new Error("DENIED");
       }
 
@@ -160,7 +156,10 @@ export async function submitDocumentForApproval(
       entityId: documentId,
       details: { reason: deniedReason ?? "unknown" },
     });
-    return deny("Не удалось отправить документ на подпись.");
+    if (deniedReason === "no_approver_available") {
+      return deny("Нет доступных менеджеров для согласования.");
+    }
+    return deny("Не удалось отправить документ на согласование.");
   }
 
   await logAuditEvent({

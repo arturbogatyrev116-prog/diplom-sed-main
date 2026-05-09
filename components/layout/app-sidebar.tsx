@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, FileText, Inbox, PenLine, Send, Archive, Search, Shield, History } from "lucide-react";
+import { LayoutDashboard, FileText, Inbox, PenLine, Send, Archive, Search, Shield, History, Users } from "lucide-react";
 
 type AppSidebarProps = {
   showAudit?: boolean;
@@ -12,6 +12,8 @@ type AppSidebarProps = {
   showInbox?: boolean;
   showOutbox?: boolean;
   showPendingSign?: boolean;
+  showUsers?: boolean;
+  role?: string;
 };
 
 export function AppSidebar({
@@ -21,19 +23,24 @@ export function AppSidebar({
   showInbox = true,
   showOutbox = true,
   showPendingSign = true,
+  showUsers = false,
+  role,
 }: AppSidebarProps) {
   const pathname = usePathname();
+
+  const pendingSignLabel = role === "OWNER" ? "На подпись ЭЦП" : "На согласование";
 
   const NAV = [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     ...(showDocuments ? [{ href: "/documents", label: "Мои документы", icon: FileText }] : []),
     ...(showInbox ? [{ href: "/inbox", label: "Входящие", icon: Inbox }] : []),
-    ...(showPendingSign ? [{ href: "/pending-sign", label: "На подпись", icon: PenLine }] : []),
+    ...(showPendingSign ? [{ href: "/pending-sign", label: pendingSignLabel, icon: PenLine }] : []),
     ...(showOutbox ? [{ href: "/outbox", label: "Исходящие", icon: Send }] : []),
     ...(showArchive ? [{ href: "/archive", label: "Архив", icon: Archive }] : []),
     { href: "/search", label: "Поиск", icon: Search },
     { href: "/settings/mfa", label: "Настройки MFA", icon: Shield },
     ...(showAudit ? [{ href: "/audit", label: "Аудит", icon: History }] : []),
+    ...(showUsers ? [{ href: "/admin/users", label: "Пользователи", icon: Users }] : []),
   ] as const;
 
   return (

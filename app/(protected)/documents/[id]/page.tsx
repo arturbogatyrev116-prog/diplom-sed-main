@@ -24,9 +24,13 @@ import { SignDocumentButton } from "@/components/documents/sign-document-button"
 import {
   getLatestReturnedForRevisionStep,
   hasPendingApprovalForApprover,
+  hasAnyApprovalStepForApprover,
   listEligibleApprovers,
 } from "@/server/workflows/approval/queries";
 import { SubmitForApprovalForm } from "@/components/workflows/submit-for-approval-form";
+import { AttachmentsSection } from "@/components/documents/attachments-section";
+import { CommentsSection } from "@/components/documents/comments-section";
+import { prisma } from "@/lib/db/prisma";
 
 const dateFmt = new Intl.DateTimeFormat("ru-RU", {
   dateStyle: "medium",
@@ -65,8 +69,9 @@ export default async function DocumentDetailPage({ params }: PageProps) {
   const canViewAsOwner = canViewDocument(subject, policyDoc);
   const canViewAsApprover =
     subject.role === "MANAGER" &&
-    doc.status === "ON_APPROVAL" &&
-    (await hasPendingApprovalForApprover({ documentId: doc.id, approverId: subject.userId }));
+    (doc.status === "ON_APPROVAL"
+      ? await hasPendingApprovalForApprover({ documentId: doc.id, approverId: subject.userId })
+      : await hasAnyApprovalStepForApprover({ documentId: doc.id, approverId: subject.userId }));
   const canViewAsAdmin = canViewDocumentAsAdminReadOnly(subject, policyDoc);
   const canViewAsSigner = canViewDocumentForSigning(subject, policyDoc);
 
@@ -93,11 +98,29 @@ export default async function DocumentDetailPage({ params }: PageProps) {
 
   const showEdit = canViewAsOwner && canEditDocument(subject, policyDoc);
   const showSubmit = canViewAsOwner && canSubmitForApproval(subject, policyDoc);
-  const approvers = showSubmit ? await listEligibleApprovers({ excludeUserId: doc.authorId }) : [];
+  const approvers = showSubmit ? await listEligibleApprovers({ excludeUserId: subject.userId }) : [];
   const revisionStep =
     canViewAsOwner && doc.status === DocumentStatus.REVISION_REQUIRED
       ? await getLatestReturnedForRevisionStep(doc.id)
       : null;
+
+  const attachments = await prisma.attachment.findMany({
+    where: { documentId: doc.id },
+    orderBy: { createdAt: "asc" },
+    select: { id: true, filename: true, mimeType: true, sizeBytes: true },
+  });
+  const canUploadAttachment = canViewAsOwner || canViewAsApprover;
+
+  const comments = await prisma.comment.findMany({
+    where: { documentId: doc.id },
+    orderBy: { createdAt: "asc" },
+    select: {
+      id: true,
+      content: true,
+      createdAt: true,
+      author: { select: { id: true, fullName: true } },
+    },
+  });
 
   // Подписание: OWNER, APPROVED, не подписан
   const alreadySigned = hasDocumentSignature(doc.id);
@@ -282,6 +305,35 @@ export default async function DocumentDetailPage({ params }: PageProps) {
               ))}
             </ul>
           )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Вложения</CardTitle>
+          <CardDescription>Прикреплённые файлы к документу</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <AttachmentsSection
+            documentId={doc.id}
+            initialAttachments={attachments}
+            canUpload={canUploadAttachment}
+          />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Комментарии</CardTitle>
+          <CardDescription>Обсуждение документа</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <CommentsSection
+            documentId={doc.id}
+            initialComments={comments}
+            currentUserId={subject.userId}
+            isAdmin={subject.role === "ADMIN"}
+          />
         </CardContent>
       </Card>
     </div>

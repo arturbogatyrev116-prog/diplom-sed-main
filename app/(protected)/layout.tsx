@@ -25,6 +25,8 @@ export default async function ProtectedLayout({
   const showInbox = role === "EMPLOYEE" || role === "MANAGER";
   const showPendingSign = role === "MANAGER" || role === "OWNER";
 
+  const showUsers = role === "ADMIN";
+
   return (
     <div className="flex min-h-svh flex-col bg-background text-foreground">
       <AppTopbar
@@ -40,6 +42,8 @@ export default async function ProtectedLayout({
           showInbox={showInbox}
           showOutbox={showOutbox}
           showPendingSign={showPendingSign}
+          showUsers={showUsers}
+          role={role}
         />
         <main className="min-h-0 flex-1 overflow-auto p-4 md:p-6">{children}</main>
       </div>

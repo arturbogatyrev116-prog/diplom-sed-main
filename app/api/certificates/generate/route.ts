@@ -1,12 +1,26 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db/prisma";
-import { generateKeyPairAndCertificate } from "@/lib/crypto/keygen";
+import { generateKeyPairAndCertificate, hasUserCertificate, getCertificateInfo } from "@/lib/crypto/keygen";
 import { logAuditEvent } from "@/server/audit/log-event";
 import { CERTIFICATE_GENERATED } from "@/server/audit/constants-signature";
 
 export const runtime = "nodejs";
 
-export async function POST() {
+export async function GET() {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return Response.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const info = getCertificateInfo(session.user.id);
+  if (!info) {
+    return Response.json({ exists: false }, { status: 200 });
+  }
+
+  return Response.json({ exists: true, info }, { status: 200 });
+}
+
+export async function POST(request: Request) {
   const session = await auth();
   if (!session?.user?.id) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
@@ -21,8 +35,17 @@ export async function POST() {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  let force = false;
   try {
-    // Генерация ключевой пары и сертификата
+    const body = await request.json();
+    force = body?.force === true;
+  } catch { /* нет тела — force остаётся false */ }
+
+  if (!force && hasUserCertificate(user.id)) {
+    return Response.json({ error: "Сертификат уже существует. Передайте force: true для перевыпуска." }, { status: 409 });
+  }
+
+  try {
     const { privateKeyPem, certificatePem, privateKeyPath, certificatePath } =
       generateKeyPairAndCertificate({
         userId: user.id,
@@ -30,7 +53,6 @@ export async function POST() {
         fullName: user.fullName,
       });
 
-    // Логирование (пути ключей скрыты от клиента)
     await logAuditEvent({
       actorId: user.id,
       action: CERTIFICATE_GENERATED,
@@ -39,6 +61,7 @@ export async function POST() {
       details: {
         certificatePath,
         privateKeyPath,
+        reissue: force,
       },
     });
 
@@ -47,7 +70,7 @@ export async function POST() {
         ok: true,
         certificate: certificatePem,
         privateKey: privateKeyPem,
-        message: "Сертификат успешно сгенерирован",
+        message: force ? "Сертификат перевыпущен" : "Сертификат успешно сгенерирован",
       },
       { status: 200 },
     );

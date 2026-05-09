@@ -1,8 +1,19 @@
 import { prisma } from "@/lib/db/prisma";
 
-export async function listLatestAuditEvents(limit = 30) {
-  return prisma.auditLog.findMany({
+function parseDetailsJson(raw: string): Record<string, unknown> {
+  try {
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) return parsed;
+    return { value: parsed };
+  } catch {
+    return { raw };
+  }
+}
+
+export async function listLatestAuditEvents(limit = 30, offset = 0) {
+  const rows = await prisma.auditLog.findMany({
     take: limit,
+    skip: offset,
     orderBy: { createdAt: "desc" },
     select: {
       id: true,
@@ -21,5 +32,14 @@ export async function listLatestAuditEvents(limit = 30) {
       },
     },
   });
+
+  return rows.map((r) => ({
+    ...r,
+    details: parseDetailsJson(r.detailsJson),
+  }));
+}
+
+export async function countAuditEvents() {
+  return prisma.auditLog.count();
 }
 

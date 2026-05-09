@@ -90,7 +90,7 @@ export default async function PendingSignPage() {
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">На подпись</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">На согласование</h1>
         <p className="mt-1 text-sm text-muted-foreground">Документы, ожидающие вашего решения.</p>
       </div>
 

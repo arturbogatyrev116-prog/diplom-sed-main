@@ -9,7 +9,8 @@
       "Bash(node -e \"require\\('dotenv'\\).config\\(\\); console.log\\('DATABASE_URL:', process.env.DATABASE_URL\\)\")",
       "Bash(node *)",
       "Bash(npm test *)",
-      "Bash(npx tsx *)"
+      "Bash(npx tsx *)",
+      "Bash(npx tsc *)"
     ]
   }
 }

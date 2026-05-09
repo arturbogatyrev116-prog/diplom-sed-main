@@ -45,10 +45,10 @@ export function canSeeDocumentsList(subject: DocumentSubject | null): boolean {
   return subject.role === UserRole.EMPLOYEE || subject.role === UserRole.MANAGER || subject.role === UserRole.OWNER;
 }
 
-/** Создание: ADMIN запрещён. */
+/** Создание: ADMIN и OWNER запрещены. */
 export function canCreateDocument(subject: DocumentSubject | null): boolean {
   if (!subject) return false;
-  return subject.role !== UserRole.ADMIN;
+  return subject.role !== UserRole.ADMIN && subject.role !== UserRole.OWNER;
 }
 
 /** Просмотр карточки: только владелец, не удалён. */
@@ -78,7 +78,7 @@ export function canViewDocumentAsAdminReadOnly(
 }
 
 /**
- * Владелец: просмотр документов на подпись ЭЦП (APPROVED, без подписи), чужих.
+ * Владелец: просмотр документов на подпись ЭЦП и завершённых (APPROVED, SIGNED, REJECTED).
  */
 export function canViewDocumentForSigning(
   subject: DocumentSubject | null,
@@ -87,7 +87,11 @@ export function canViewDocumentForSigning(
   if (!subject) return false;
   if (subject.role !== UserRole.OWNER) return false;
   if (!isActive(doc)) return false;
-  return doc.status === DocumentStatus.APPROVED || doc.status === DocumentStatus.SIGNED;
+  return (
+    doc.status === DocumentStatus.APPROVED ||
+    doc.status === DocumentStatus.SIGNED ||
+    doc.status === DocumentStatus.REJECTED
+  );
 }
 
 /** Редактирование (UI / страница edit): владелец, черновик или возврат на доработку, не ADMIN. */
@@ -106,10 +110,10 @@ export function canUpdateDocument(subject: DocumentSubject | null, doc: Document
   return canEditDocument(subject, doc);
 }
 
-/** Отправка на подпись: владелец, черновик или повторная отправка после возврата, активный документ, не ADMIN. */
+/** Отправка на подпись: владелец документа, черновик или повторная отправка после возврата, активный документ, не ADMIN, не OWNER. */
 export function canSubmitForApproval(subject: DocumentSubject | null, doc: DocumentPolicyDoc): boolean {
   if (!subject) return false;
-  if (subject.role === UserRole.ADMIN) return false;
+  if (subject.role === UserRole.ADMIN || subject.role === UserRole.OWNER) return false;
   if (!isActive(doc)) return false;
   if (!isOwner(subject, doc)) return false;
   return (

@@ -1,11 +1,12 @@
 import { prisma } from "@/lib/db/prisma";
 import { verifyCMSSignature, getDocumentSignaturePath } from "@/lib/crypto/sign";
-import fs from "fs";
 
-export async function listDocumentsForUser(authorId: string) {
+export async function listDocumentsForUser(authorId: string, limit = 20, offset = 0) {
   return prisma.document.findMany({
     where: { authorId, deletedAt: null },
     orderBy: { updatedAt: "desc" },
+    take: limit,
+    skip: offset,
     select: {
       id: true,
       title: true,
@@ -15,6 +16,10 @@ export async function listDocumentsForUser(authorId: string) {
       updatedAt: true,
     },
   });
+}
+
+export async function countDocumentsForUser(authorId: string) {
+  return prisma.document.count({ where: { authorId, deletedAt: null } });
 }
 
 /** Активный документ по id (без фильтра по автору — проверка прав в policy на странице / в action). */
@@ -75,21 +80,15 @@ export async function getDocumentSignatureInfo(documentId: string) {
 
 /** Документы на подпись ЭЦП (APPROVED, без подписи) */
 export async function listDocumentsForSigning() {
-  const allDocs = await prisma.document.findMany({
-    where: { status: "APPROVED", deletedAt: null },
+  return prisma.document.findMany({
+    where: {
+      status: "APPROVED",
+      deletedAt: null,
+      signature: null,
+    },
     orderBy: { updatedAt: "desc" },
     include: {
       author: { select: { id: true, fullName: true } },
     },
   });
-
-  // Исключаем уже подписанные
-  const docIds = allDocs.map((d) => d.id);
-  const signedDocIds = await prisma.signature.findMany({
-    where: { documentId: { in: docIds } },
-    select: { documentId: true },
-  });
-  const signedSet = new Set(signedDocIds.map((s) => s.documentId));
-
-  return allDocs.filter((d) => !signedSet.has(d.id));
 }
