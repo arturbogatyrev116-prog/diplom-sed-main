@@ -9,6 +9,12 @@ if errorlevel 1 (
   exit /b 1
 )
 
+if not exist ".env" (
+  echo Creating default .env file...
+  echo DATABASE_URL="file:./prisma/dev.db"> .env
+  echo AUTH_SECRET="change-me-to-a-random-32-char-string">> .env
+)
+
 echo [2/4] Applying migrations...
 call npx prisma migrate deploy
 if errorlevel 1 (
