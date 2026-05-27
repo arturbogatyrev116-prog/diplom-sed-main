@@ -29,7 +29,16 @@ export async function DELETE(_request: NextRequest, { params }: Params) {
     return Response.json({ error: "Пользователь не найден" }, { status: 404 });
   }
 
-  await prisma.user.delete({ where: { id } });
+  await prisma.$transaction(async (tx) => {
+    await tx.signature.deleteMany({ where: { signedById: id } });
+    await tx.approvalStep.deleteMany({ where: { approverId: id } });
+    await tx.attachment.deleteMany({ where: { uploadedById: id } });
+    await tx.comment.deleteMany({ where: { authorId: id } });
+    await tx.documentVersion.deleteMany({ where: { createdById: id } });
+    await tx.auditLog.updateMany({ where: { actorId: id }, data: { actorId: null } });
+    await tx.document.deleteMany({ where: { authorId: id } });
+    await tx.user.delete({ where: { id } });
+  });
 
   await logAuditEvent({
     actorId: subject.userId,
