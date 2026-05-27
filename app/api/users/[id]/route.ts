@@ -11,6 +11,37 @@ const ALLOWED_ROLES = new Set(Object.values(UserRole));
 
 type Params = { params: Promise<{ id: string }> };
 
+export async function DELETE(_request: NextRequest, { params }: Params) {
+  const { id } = await params;
+
+  const session = await auth();
+  const subject = parseDocumentSubject(session);
+  if (!subject || subject.role !== UserRole.ADMIN) {
+    return Response.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  if (subject.userId === id) {
+    return Response.json({ error: "Нельзя удалить собственный аккаунт" }, { status: 400 });
+  }
+
+  const user = await prisma.user.findUnique({ where: { id }, select: { id: true, fullName: true, email: true } });
+  if (!user) {
+    return Response.json({ error: "Пользователь не найден" }, { status: 404 });
+  }
+
+  await prisma.user.delete({ where: { id } });
+
+  await logAuditEvent({
+    actorId: subject.userId,
+    action: "USER_DELETED",
+    entityType: "User",
+    entityId: id,
+    details: { email: user.email, fullName: user.fullName },
+  });
+
+  return Response.json({ ok: true });
+}
+
 export async function PATCH(request: NextRequest, { params }: Params) {
   const { id } = await params;
 

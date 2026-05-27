@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { UserRole } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 
@@ -22,6 +23,8 @@ type User = {
 export function UserRow({ user: initial, currentUserId }: { user: User; currentUserId: string }) {
   const [user, setUser] = useState(initial);
   const [loading, setLoading] = useState(false);
+  const [deleted, setDeleted] = useState(false);
+  const router = useRouter();
   const isSelf = user.id === currentUserId;
 
   const patch = async (data: Partial<{ isActive: boolean; role: UserRole }>) => {
@@ -38,6 +41,8 @@ export function UserRow({ user: initial, currentUserId }: { user: User; currentU
       setLoading(false);
     }
   };
+
+  if (deleted) return null;
 
   return (
     <tr className="border-b last:border-0 hover:bg-muted/30">
@@ -66,14 +71,36 @@ export function UserRow({ user: initial, currentUserId }: { user: User; currentU
       </td>
       <td className="px-4 py-3">
         {!isSelf ? (
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={loading}
-            onClick={() => patch({ isActive: !user.isActive })}
-          >
-            {user.isActive ? "Деактивировать" : "Активировать"}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={loading}
+              onClick={() => patch({ isActive: !user.isActive })}
+            >
+              {user.isActive ? "Деактивировать" : "Активировать"}
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              disabled={loading}
+              onClick={async () => {
+                if (!confirm(`Удалить пользователя "${user.fullName}"? Это действие необратимо.`)) return;
+                setLoading(true);
+                try {
+                  const res = await fetch(`/api/users/${user.id}`, { method: "DELETE" });
+                  if (res.ok) {
+                    setDeleted(true);
+                    router.refresh();
+                  }
+                } finally {
+                  setLoading(false);
+                }
+              }}
+            >
+              Удалить
+            </Button>
+          </div>
         ) : (
           <span className="text-xs text-muted-foreground">Вы</span>
         )}

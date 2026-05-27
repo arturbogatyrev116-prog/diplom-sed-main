@@ -15,7 +15,16 @@
       "Bash(du -sh .next)",
       "Bash(du -sh data)",
       "Bash(du -sh prisma)",
-      "Bash(du -sh .git)"
+      "Bash(du -sh .git)",
+      "Bash(npx --yes mammoth \"тексты/диплом_практика_2_семестр_1,2_глава_и_практикаа.docx\" --output-format=text)",
+      "Bash(npx mammoth *)",
+      "Bash(powershell -Command ' *)",
+      "Bash(curl -s -X POST http://localhost:3000/api/auth/callback/credentials -H \"Content-Type: application/x-www-form-urlencoded\" -d \"email=owner@local.test&password=Password123!\")",
+      "Bash(curl -v -X POST http://localhost:3000/api/auth/callback/credentials -H \"Content-Type: application/x-www-form-urlencoded\" -d \"email=owner@local.test&password=Password123!\")",
+      "Bash(curl -s http://localhost:3000/api/auth/csrf)",
+      "Bash(curl -s -c cookies.txt http://localhost:3000/api/auth/csrf)",
+      "Bash(python -c \"import sys,json; print\\(json.load\\(sys.stdin\\)['csrfToken']\\)\")",
+      "Bash(curl -s -b cookies.txt -X POST http://localhost:3000/api/auth/callback/credentials -H 'Content-Type: application/x-www-form-urlencoded' -d 'email=owner@local.test&password=Password123!&csrfToken=__TRACKED_VAR__' -D -)"
     ]
   }
 }
