@@ -63,7 +63,7 @@ export default async function PendingSignPage() {
                   <div className="grid gap-2 sm:grid-cols-2">
                     <div>
                       <div className="text-xs text-muted-foreground">Автор</div>
-                      <div className="font-medium">{doc.author.fullName}</div>
+                      <div className="font-medium">{doc.author?.fullName ?? doc.authorName ?? "Удалённый пользователь"}</div>
                     </div>
                     <div>
                       <div className="text-xs text-muted-foreground">Обновлён</div>
@@ -121,7 +121,7 @@ export default async function PendingSignPage() {
                   <div className="grid gap-2 sm:grid-cols-2">
                     <div>
                       <div className="text-xs text-muted-foreground">Автор</div>
-                      <div className="font-medium">{doc.author.fullName}</div>
+                      <div className="font-medium">{doc.author?.fullName ?? doc.authorName ?? "Удалённый пользователь"}</div>
                     </div>
                     <div>
                       <div className="text-xs text-muted-foreground">Поступило</div>

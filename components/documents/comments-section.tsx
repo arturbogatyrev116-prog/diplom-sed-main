@@ -8,7 +8,8 @@ type Comment = {
   id: string;
   content: string;
   createdAt: Date;
-  author: { id: string; fullName: string };
+  authorName: string | null;
+  author: { id: string; fullName: string } | null;
 };
 
 type Props = {
@@ -46,10 +47,10 @@ export function CommentsSection({ documentId, initialComments, currentUserId, is
             <li key={c.id} className="rounded-md border bg-muted/20 px-4 py-3 text-sm">
               <div className="flex items-start justify-between gap-2">
                 <div className="flex flex-col gap-0.5">
-                  <span className="font-medium">{c.author.fullName}</span>
+                  <span className="font-medium">{c.author?.fullName ?? c.authorName ?? "Удалённый пользователь"}</span>
                   <span className="text-xs text-muted-foreground">{dateFmt.format(c.createdAt)}</span>
                 </div>
-                {(c.author.id === currentUserId || isAdmin) && (
+                {(c.author?.id === currentUserId || isAdmin) && (
                   <form action={handleDelete.bind(null, c.id)}>
                     <button
                       type="submit"

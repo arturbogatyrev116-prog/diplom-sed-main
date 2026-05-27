@@ -67,6 +67,7 @@ export default async function SearchPage({ searchParams }: PageProps) {
           createdAt: true,
           updatedAt: true,
           author: { select: { fullName: true } },
+          authorName: true,
         },
       })
     : [];
@@ -136,7 +137,7 @@ export default async function SearchPage({ searchParams }: PageProps) {
                 <CardContent className="grid gap-2 text-sm sm:grid-cols-3">
                   <div>
                     <div className="text-xs text-muted-foreground">Автор</div>
-                    <div className="font-medium">{d.author.fullName}</div>
+                    <div className="font-medium">{d.author?.fullName ?? d.authorName ?? "Удалённый пользователь"}</div>
                   </div>
                   <div>
                     <div className="text-xs text-muted-foreground">Создан</div>

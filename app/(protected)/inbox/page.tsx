@@ -73,10 +73,10 @@ export default async function InboxPage({ searchParams }: PageProps) {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-3 text-sm">
-                    {step?.decidedAt && step.approver ? (
+                    {step?.decidedAt && (step.approver || step.approverName) ? (
                       <div className="rounded-md border border-border/80 bg-muted/20 p-3">
                         <div className="text-xs text-muted-foreground">Вернул на доработку</div>
-                        <div className="font-medium">{step.approver.fullName}</div>
+                        <div className="font-medium">{step.approver?.fullName ?? step.approverName ?? "Удалённый пользователь"}</div>
                         <div className="mt-1 text-xs text-muted-foreground">
                           {dateFmt.format(step.decidedAt)}
                         </div>

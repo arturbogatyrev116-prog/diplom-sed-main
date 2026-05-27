@@ -30,8 +30,54 @@ export async function getActiveDocumentById(id: string) {
       author: { select: { id: true, fullName: true, email: true } },
       versions: {
         orderBy: { versionNumber: "desc" },
-        include: {
+        select: {
+          id: true,
+          versionNumber: true,
+          titleSnapshot: true,
+          contentSnapshot: true,
+          createdByName: true,
+          createdAt: true,
           createdBy: { select: { id: true, fullName: true } },
+        },
+      },
+      comments: {
+        orderBy: { createdAt: "desc" },
+        select: {
+          id: true,
+          content: true,
+          authorName: true,
+          createdAt: true,
+          updatedAt: true,
+          author: { select: { id: true, fullName: true } },
+        },
+      },
+      approvalRoute: {
+        include: {
+          steps: {
+            orderBy: { stepOrder: "asc" },
+            select: {
+              id: true,
+              stepOrder: true,
+              status: true,
+              comment: true,
+              approverName: true,
+              decidedAt: true,
+              createdAt: true,
+              approver: { select: { id: true, fullName: true, role: true, email: true } },
+            },
+          },
+        },
+      },
+      attachments: true,
+      signature: {
+        select: {
+          id: true,
+          documentId: true,
+          signedByName: true,
+          contentHash: true,
+          signaturePath: true,
+          signedAt: true,
+          signedBy: { select: { id: true, fullName: true, email: true } },
         },
       },
     },
@@ -42,7 +88,14 @@ export async function getActiveDocumentById(id: string) {
 export async function getDocumentSignatureInfo(documentId: string) {
   const signature = await prisma.signature.findUnique({
     where: { documentId },
-    include: {
+    select: {
+      id: true,
+      documentId: true,
+      signedById: true,
+      signedByName: true,
+      contentHash: true,
+      signaturePath: true,
+      signedAt: true,
       signedBy: { select: { id: true, fullName: true, email: true } },
     },
   });
@@ -87,7 +140,14 @@ export async function listDocumentsForSigning() {
       signature: null,
     },
     orderBy: { updatedAt: "desc" },
-    include: {
+    select: {
+      id: true,
+      title: true,
+      type: true,
+      status: true,
+      authorName: true,
+      createdAt: true,
+      updatedAt: true,
       author: { select: { id: true, fullName: true } },
     },
   });

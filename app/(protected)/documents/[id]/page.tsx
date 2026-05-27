@@ -118,6 +118,7 @@ export default async function DocumentDetailPage({ params }: PageProps) {
       id: true,
       content: true,
       createdAt: true,
+      authorName: true,
       author: { select: { id: true, fullName: true } },
     },
   });
@@ -169,12 +170,12 @@ export default async function DocumentDetailPage({ params }: PageProps) {
         </p>
       </div>
 
-      {revisionStep?.decidedAt && revisionStep.approver ? (
+      {revisionStep?.decidedAt && (revisionStep.approver || revisionStep.approverName) ? (
         <Card className="border-amber-500/40">
           <CardHeader>
             <CardTitle>Возврат на доработку</CardTitle>
             <CardDescription>
-              {revisionStep.approver.fullName} · {dateFmt.format(revisionStep.decidedAt)}
+              {revisionStep.approver?.fullName ?? revisionStep.approverName ?? "Удалённый пользователь"} · {dateFmt.format(revisionStep.decidedAt)}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -191,7 +192,7 @@ export default async function DocumentDetailPage({ params }: PageProps) {
         <CardContent className="grid gap-3 text-sm sm:grid-cols-2">
           <div>
             <div className="text-xs text-muted-foreground">Автор</div>
-            <div className="font-medium">{doc.author.fullName}</div>
+            <div className="font-medium">{doc.author?.fullName ?? doc.authorName ?? "Удалённый пользователь"}</div>
           </div>
           <div>
             <div className="text-xs text-muted-foreground">Создан</div>
@@ -257,7 +258,7 @@ export default async function DocumentDetailPage({ params }: PageProps) {
             <CardContent className="grid gap-3 text-sm sm:grid-cols-2">
               <div>
                 <div className="text-xs text-muted-foreground">Подписан</div>
-                <div className="font-medium">{signatureInfo.signature.signedBy.fullName}</div>
+                <div className="font-medium">{signatureInfo.signature.signedBy?.fullName ?? signatureInfo.signature.signedByName ?? "Удалённый пользователь"}</div>
               </div>
               <div>
                 <div className="text-xs text-muted-foreground">Дата подписи</div>
@@ -299,7 +300,7 @@ export default async function DocumentDetailPage({ params }: PageProps) {
                     Версия {v.versionNumber}: {v.titleSnapshot}
                   </span>
                   <span className="text-xs text-muted-foreground">
-                    {v.createdBy.fullName} · {dateFmt.format(v.createdAt)}
+                    {v.createdBy?.fullName ?? v.createdByName ?? "Удалённый пользователь"} · {dateFmt.format(v.createdAt)}
                   </span>
                 </li>
               ))}

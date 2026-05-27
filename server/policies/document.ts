@@ -8,7 +8,7 @@ export type DocumentSubject = {
 
 /** Минимальные поля документа для ABAC (владелец, статус, soft-delete). */
 export type DocumentPolicyDoc = {
-  authorId: string;
+  authorId: string | null;
   status: DocumentStatus;
   deletedAt: Date | null;
 };
@@ -36,7 +36,7 @@ function isActive(doc: Pick<DocumentPolicyDoc, "deletedAt">): boolean {
 }
 
 function isOwner(subject: DocumentSubject, doc: Pick<DocumentPolicyDoc, "authorId">): boolean {
-  return doc.authorId === subject.userId;
+  return doc.authorId != null && doc.authorId === subject.userId;
 }
 
 /** Список документов: все роли из ТЗ могут открывать раздел (данные всё равно только свои). */
@@ -146,7 +146,7 @@ export function canSignDocument(
 }
 
 export function toPolicyDoc(d: {
-  authorId: string;
+  authorId: string | null;
   status: DocumentStatus;
   deletedAt: Date | null;
 }): DocumentPolicyDoc {

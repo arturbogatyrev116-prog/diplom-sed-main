@@ -2,7 +2,7 @@ import { ApprovalStepStatus, DocumentStatus, UserRole } from "@prisma/client";
 import type { DocumentSubject } from "@/server/policies/document";
 
 export type ApprovalPolicyStep = {
-  approverId: string;
+  approverId: string | null;
   status: ApprovalStepStatus;
 };
 
@@ -21,6 +21,6 @@ export function canDecideApproval(
   if (doc.deletedAt != null) return false;
   if (doc.status !== DocumentStatus.ON_APPROVAL) return false;
   if (step.status !== ApprovalStepStatus.PENDING) return false;
-  return step.approverId === subject.userId;
+  return step.approverId != null && step.approverId === subject.userId;
 }
 

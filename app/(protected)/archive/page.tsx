@@ -62,14 +62,13 @@ export default async function ArchivePage({ searchParams }: PageProps) {
         <>
           <div className="grid gap-4">
             {docs.map((d) => {
-              const authorId = d.author?.id ?? subject.userId;
-              const authorName = d.author?.fullName ?? null;
-              const canArchive = canArchiveDocument(subject, { authorId, status: d.status, deletedAt: null });
+              const authorName = d.author?.fullName ?? d.authorName ?? "Удалённый пользователь";
+              const canArchive = canArchiveDocument(subject, { authorId: d.author?.id ?? subject.userId, status: d.status, deletedAt: null });
               const steps = d.approvalRoute?.steps ?? [];
               const lastStep = steps.length > 0 ? steps[steps.length - 1] : null;
               const decided = lastStep?.decidedAt ?? null;
               const decisionStatus = lastStep?.status ?? null;
-              const approverName = lastStep?.approver?.fullName ?? null;
+              const approverName = lastStep?.approver?.fullName ?? lastStep?.approverName ?? null;
 
               return (
                 <Card key={d.id}>

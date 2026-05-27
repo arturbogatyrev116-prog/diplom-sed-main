@@ -92,6 +92,7 @@ export async function listInboxRevisionForAuthor(authorId: string, limit = 20, o
             select: {
               comment: true,
               decidedAt: true,
+              approverName: true,
               approver: { select: { fullName: true } },
             },
           },
@@ -126,6 +127,7 @@ export async function getLatestReturnedForRevisionStep(documentId: string) {
     select: {
       comment: true,
       decidedAt: true,
+      approverName: true,
       approver: { select: { fullName: true } },
     },
   });
@@ -162,6 +164,7 @@ export async function listPendingSignForApprover(approverId: string) {
               author: {
                 select: { id: true, fullName: true, email: true },
               },
+              authorName: true,
             },
           },
         },
@@ -201,6 +204,7 @@ export async function listOutboxForAuthor(authorId: string, limit = 20, offset =
               createdAt: true,
               decidedAt: true,
               approver: { select: { id: true, fullName: true, role: true } },
+              approverName: true,
             },
           },
         },
@@ -235,6 +239,7 @@ export async function listArchiveForAuthor(authorId: string, limit = 20, offset 
       updatedAt: true,
       archivedAt: true,
       author: { select: { id: true, fullName: true, email: true, role: true } },
+      authorName: true,
       approvalRoute: {
         select: {
           createdAt: true,
@@ -244,6 +249,7 @@ export async function listArchiveForAuthor(authorId: string, limit = 20, offset 
               status: true,
               decidedAt: true,
               approver: { select: { id: true, fullName: true, role: true } },
+              approverName: true,
             },
           },
         },
@@ -281,6 +287,7 @@ export async function listArchiveForAdmin(limit = 20, offset = 0) {
       updatedAt: true,
       archivedAt: true,
       author: { select: { id: true, fullName: true, email: true, role: true } },
+      authorName: true,
       approvalRoute: {
         select: {
           createdAt: true,
@@ -290,6 +297,7 @@ export async function listArchiveForAdmin(limit = 20, offset = 0) {
               status: true,
               decidedAt: true,
               approver: { select: { id: true, fullName: true, role: true } },
+              approverName: true,
             },
           },
         },

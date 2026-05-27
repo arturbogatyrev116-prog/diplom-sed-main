@@ -30,13 +30,16 @@ export async function DELETE(_request: NextRequest, { params }: Params) {
   }
 
   await prisma.$transaction(async (tx) => {
-    await tx.signature.deleteMany({ where: { signedById: id } });
-    await tx.approvalStep.deleteMany({ where: { approverId: id } });
-    await tx.attachment.deleteMany({ where: { uploadedById: id } });
-    await tx.comment.deleteMany({ where: { authorId: id } });
-    await tx.documentVersion.deleteMany({ where: { createdById: id } });
-    await tx.auditLog.updateMany({ where: { actorId: id }, data: { actorId: null } });
-    await tx.document.deleteMany({ where: { authorId: id } });
+    const fullName = user.fullName;
+
+    await tx.document.updateMany({ where: { authorId: id }, data: { authorName: fullName } });
+    await tx.documentVersion.updateMany({ where: { createdById: id }, data: { createdByName: fullName } });
+    await tx.comment.updateMany({ where: { authorId: id }, data: { authorName: fullName } });
+    await tx.attachment.updateMany({ where: { uploadedById: id }, data: { uploadedByName: fullName } });
+    await tx.signature.updateMany({ where: { signedById: id }, data: { signedByName: fullName } });
+    await tx.approvalStep.updateMany({ where: { approverId: id }, data: { approverName: fullName } });
+    await tx.auditLog.updateMany({ where: { actorId: id }, data: { actorName: fullName } });
+
     await tx.user.delete({ where: { id } });
   });
 

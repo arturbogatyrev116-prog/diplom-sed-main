@@ -74,7 +74,7 @@ export default async function OutboxPage({ searchParams }: PageProps) {
                     <div>
                       <div className="text-xs text-muted-foreground">Согласующий</div>
                       <div className="font-medium">
-                        {step?.approver?.fullName ?? "—"} {step?.approver ? `(${step.approver.role})` : ""}
+                        {step?.approver?.fullName ?? step?.approverName ?? "—"} {step?.approver ? `(${step.approver.role})` : ""}
                       </div>
                     </div>
                     <div>
